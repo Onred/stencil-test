@@ -136,7 +136,7 @@ export default class Category extends CatalogPage {
     addAllProductsToCart(e) {
         this.hideAlertBanners();
         utils.api.cart.getCart({}, (err, response) => {
-            const cart_id = response ? response.id : "";
+            const cart_id = response ? `/${response.id}` : "";
             const cart_quantity = Number(localStorage.getItem('cart-quantity'));
             const products_list = $(e.currentTarget).data("productsList")
             let line_items = []
@@ -151,7 +151,7 @@ export default class Category extends CatalogPage {
             const cart_payload = {
                 "lineItems": line_items
             }
-            const route = "/api/storefront/carts/" + cart_id + "/items";
+            const route = "/api/storefront/carts" + cart_id + "/items";
             return fetch(route, {
                 method: "POST",
                 credentials: "same-origin",

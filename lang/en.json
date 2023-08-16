@@ -232,7 +232,16 @@
         "filter_select_announcement": "The filter has been applied",
         "view_all": {
             "name": "All {category}"
-        }
+        },
+        "add_all_to_cart": "Add All To Cart",
+        "remove_all_from_cart": "Remove All Items",
+        "add_all_cart_announcement": "{total, plural, one {# item} other {# items}} added to your cart",
+        "remove_all_cart_announcement": "Your cart has been cleared"
+    },
+    "customer_banner": {
+        "welcome_back": "Welcome back, {name}!",
+        "detail": "Your {detail_name} is {detail_value}",
+        "missing": "You didn't provide a customer {detail_name}."
     },
     "brand": {
         "label": "Brands",

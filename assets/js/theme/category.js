@@ -1,4 +1,4 @@
-import { hooks } from '@bigcommerce/stencil-utils';
+import utils from '@bigcommerce/stencil-utils';
 import CatalogPage from './catalog';
 import compareProducts from './global/compare-products';
 import FacetedSearch from './common/faceted-search';
@@ -40,12 +40,15 @@ export default class Category extends CatalogPage {
             this.initFacetedSearch();
         } else {
             this.onSortBySubmit = this.onSortBySubmit.bind(this);
-            hooks.on('sortBy-submitted', this.onSortBySubmit);
+            utils.hooks.on('sortBy-submitted', this.onSortBySubmit);
         }
 
         $('a.reset-btn').on('click', () => this.setLiveRegionsAttributes($('span.reset-message'), 'status', 'polite'));
 
         this.ariaNotifyNoProducts();
+
+        $('[data-button-type="add-all-to-cart"]').on('click', (e) => this.addAllProductsToCart(e));
+        $('[data-button-type="remove-all-from-cart"]').on('click', (e) => this.removeAllFromCart(e));
     }
 
     ariaNotifyNoProducts() {
@@ -99,6 +102,100 @@ export default class Category extends CatalogPage {
                 maxPriceNotEntered,
                 onInvalidPrice,
             },
+        });
+    }
+
+    hideAlertBanners() {
+        const element_add_all_to_cart_alart = document.getElementById("add-all-to-cart");
+        const element_remove_all_from_cart_alart = document.getElementById("remove-all-from-cart");
+        element_add_all_to_cart_alart.classList.add("hide");
+        element_remove_all_from_cart_alart.classList.add("hide");
+    }
+
+    showAlertBanner(banner_type) {
+        const element_add_all_to_cart_alart = document.getElementById("add-all-to-cart");
+        const element_remove_all_from_cart_alart = document.getElementById("remove-all-from-cart");
+        if (banner_type === "add_all") {
+            element_add_all_to_cart_alart.classList.remove("hide");
+        }
+        if (banner_type === "remove_all") {
+            element_remove_all_from_cart_alart.classList.remove("hide");
+        }
+    }
+
+    showHideRemoveButton(action) {
+        const element_remove_all_from_cart_button = document.getElementById("remove-all-from-cart-button");
+        if (action === "show") {
+            element_remove_all_from_cart_button.style.display = "inline-block"
+        }
+        if (action === "hide") {
+            element_remove_all_from_cart_button.style.display = "none"
+        }
+    }
+
+    addAllProductsToCart(e) {
+        this.hideAlertBanners();
+        
+        utils.api.cart.getCart({}, (err, response) => {
+            const cart_id = response ? response.id : "";
+            const cart_quantity = Number(localStorage.getItem('cart-quantity'));
+            const products_list = $(e.currentTarget).data("productsList")
+            let line_items = []
+            products_list.forEach(product => {
+                if (!product.has_options) {
+                    line_items.push({
+                        quantity: 1,
+                        productId: product.id
+                    });
+                }
+            });
+            const cart_payload = {
+                "lineItems": line_items
+            }
+            console.log(cart_payload)
+            const route = "/api/storefront/carts/" + cart_id + "/items";
+            return fetch(route, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(cart_payload),
+            })
+            .then(response => response.json())
+            .then(result => {
+                $('body').trigger('cart-quantity-update', cart_quantity + line_items.length);
+                this.showAlertBanner("add_all");
+                this.showHideRemoveButton("show")
+            })
+            .catch(error => console.error(error));
+        });
+    }
+
+    removeAllFromCart(e) {
+        this.hideAlertBanners();
+        utils.api.cart.getCart({}, (err, response) => {
+            console.log(response)
+            const cart_id = response.id;
+            const cart_quantity = Number(localStorage.getItem('cart-quantity'));
+            const route = "/api/storefront/carts/" + cart_id;
+            fetch(route, {
+                method: 'DELETE',
+                credentials: "same-origin",
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                const status_code = response.status
+                if (status_code === 204) {
+                    $('body').trigger('cart-quantity-update', 0);
+                    this.showAlertBanner("remove_all");
+                    console.log(e)
+                    this.showHideRemoveButton("hide")
+                }
+            })
+            .catch(err => console.error(err));
         });
     }
 }

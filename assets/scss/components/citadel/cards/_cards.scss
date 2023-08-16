@@ -35,6 +35,9 @@
         .card-figcaption {
             opacity: 1;
         }
+        .card-second-image {
+            opacity: 1;
+        }
     }
 
     &__link {
@@ -73,6 +76,10 @@
     max-height: 100%;
     object-fit: contain;
     width: 100%;
+}
+
+.card-second-image {
+    opacity: 0;
 }
 
 .card-title {

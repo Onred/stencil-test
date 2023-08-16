@@ -1,146 +1,61 @@
-# Cornerstone
-![tests](https://github.com/bigcommerce/cornerstone/workflows/Theme%20Bundling%20Test/badge.svg?branch=master)
+# BigCommerce Theme Builder Test
+Jared ONeil
 
-Stencil's Cornerstone theme is the building block for BigCommerce theme developers to get started quickly developing premium quality themes on the BigCommerce platform.
+This readme describes an overview of my test as well as some of my thoughts.
 
-### Stencil Utils
-[Stencil-utils](https://github.com/bigcommerce/stencil-utils) is our supporting library for our events and remote interactions.
+### Installation
+Installing the Stencil CLI and cornerstone theme was a very smooth experience. I did so on my personal machine, which runs a non-Debian distribution of Linux, and I had no problem initializing everything with the commands provided in the BigCommerce documentation. Since I will be submitting this test on a public GitHub repository, I double-checked the .gitignore file to make sure that it included all of the standard things such as node modules, my oauth tokens, etc, which it does by default.
 
-## JS API
-When writing theme JavaScript (JS) there is an API in place for running JS on a per page basis. To properly write JS for your theme, the following page types are available to you:
+### My Tasks
+The tasks assigned to me for this test are to edit the default cornerstone theme to
+* Add a new item category called "Special Items"
+* Add a new product to that category called "Special Item" with 2 images.
+* Create a feature to show the product's second image on hover.
+* Make two functional buttons on the category page next to each other that utilize Storefront API to:
+    * "Add All To Cart" which adds every item in the category to the cart.
+    * "Remove All Items" which clears the cart. It should only appear if there are items to clear.
+* Trigger a notification when either of the above button's actions have completed.
+* Bonus: Use Handlebars to show a banner with some customer data at the top of the category page.
 
-* "pages/account/addresses"
-* "pages/account/add-address"
-* "pages/account/add-return"
-* "pages/account/add-wishlist"
-* "pages/account/recent-items"
-* "pages/account/download-item"
-* "pages/account/edit"
-* "pages/account/return-saved"
-* "pages/account/returns"
-* "pages/account/payment-methods"
-* "pages/auth/login"
-* "pages/auth/account-created"
-* "pages/auth/create-account"
-* "pages/auth/new-password"
-* "pages/blog"
-* "pages/blog-post"
-* "pages/brand"
-* "pages/brands"
-* "pages/cart"
-* "pages/category"
-* "pages/compare"
-* "pages/errors"
-* "pages/gift-certificate/purchase"
-* "pages/gift-certificate/balance"
-* "pages/gift-certificate/redeem"
-* "global"
-* "pages/home"
-* "pages/order-complete"
-* "pages/page"
-* "pages/product"
-* "pages/search"
-* "pages/sitemap"
-* "pages/subscribed"
-* "pages/account/wishlist-details"
-* "pages/account/wishlists"
+## Overview
+The first two tasks were done on the store website itself, so not much to talk about there. I'm a big fan of bourbon whiskey, so I selected two royalty-free images of that.
 
-These page types will correspond to the pages within your theme. Each one of these page types map to an ES6 module that extends the base `PageManager` abstract class.
+Before completing any coding tasks, I decided to lay some ground rules for myself. Namely that I would:
+1. Try to conform to the existing syntax and directory structure of the theme as much as possible, and
+2. Ensure that my changes work on all of the other pre-generated example category pages.
 
-```javascript
-    export default class Auth extends PageManager {
-        constructor() {
-            // Set up code goes here; attach to internals and use internals as you would 'this'
-        }
-    }
-```
+Of course, it would be possible to edit just one file and design my features to only work for the narrow use case laid out for this test, but I prefer to design code that won't break as the site expands.
 
-### JS Template Context Injection
-Occasionally you may need to use dynamic data from the template context within your client-side theme application code.
+### Hover
+#### Relevant files
+- [card.html](https://github.com/Onred/stencil-test/tree/master/templates/components/products/card.html)
+- [\_cards.scss](https://github.com/Onred/stencil-test/tree/master/assets/scss/components/citadel/cards/_cards.scss)
 
-Two helpers are provided to help achieve this.
+I started with the task to make the 2nd image appear on hover. A lot of the time for this was spent on me trying to understand how stencil organized things. In the end, I came up with a css solution and utilized Handlebars logic to make sure it worked even if the product had one or no image.
 
-The inject helper allows you to compose a JSON object with a subset of the template context to be sent to the browser.
+I simply loaded the second image on top of the first image using the same pre-existing component. I surrounded it in an if block to protect from errors should no second image exist and assigned to it a custom class `card-second-image` which sets the initial opacity to 0. I added a `:hover` effect to the existing `.card-figure` class to set the opacity to 1.
 
-```
-{{inject "stringBasedKey" contextValue}}
-```
+### Buttons
+#### Relevant files
+- [category.html](https://github.com/Onred/stencil-test/tree/master/templates/pages/category.html)
+- [category.js](https://github.com/Onred/stencil-test/tree/master/assets/js/theme/category.js)
+- [cart-buttons.html](https://github.com/Onred/stencil-test/tree/master/templates/components/category/cart-buttons.html)
+- [\_alerts.scss](https://github.com/Onred/stencil-test/tree/master/assets/scss/components/foundation/alerts/_alerts.scss)
+- [en.json](https://github.com/Onred/stencil-test/tree/master/lang/en.json)
 
-To retrieve the parsable JSON object, just call `{{jsContext}}` after all of the `{{@inject}}` calls.
+I learned a lot about Stencil, Handlebars, and Cornerstone with these tasks. Coming from mostly working in Vue/React, integrating Javascript seemed a little convoluted at first. In the end, I relied on the examples provided in the Storefront API documentation for the Javascript and pulled inspiration from other parts of the theme code. I utilized the existing alert banners to display notifications and added my own simple animation to make it look a little bit better. For any text, I made sure to use the existing language file, albeit only in English for this test.
 
-For example, to setup the product name in your client-side app, you can do the following if you're in the context of a product:
+Attempting to use the `Add All` button on a page containing a product with options broke the API. The Front Matter on the categories pages did not expose the options, so I spent some time writing conditions to exclude those products when the button is pressed and hide the button if there is nothing to add. This was only relevant to prevent the button from breaking on other pages, but I felt like it was worth the time to understand how to fix this bug.
 
-```html
-{{inject "myProductName" product.title}}
+I also played around with hacking the Handlebars helpers to do a simple calculation on the notification text. I'm not entirely pleased with this solution as I would rather want to find a more elegant way using Javascript, but it worked.
 
-<script>
-// Note the lack of quotes around the jsContext handlebars helper, it becomes a string automatically.
-var jsContext = JSON.parse({{jsContext}}); // jsContext would output "{\"myProductName\": \"Sample Product\"}" which can feed directly into your JavaScript
+### User Banner
+#### Relevant files
+- [user-banner.html](https://github.com/Onred/stencil-test/tree/master/templates/components/category/user-banner.html)
+- [user-banner-detail.html](https://github.com/Onred/stencil-test/tree/master/templates/components/category/user-banner-detail.html)
+- [\_component.scss](https://github.com/Onred/stencil-test/tree/master/assets/scss/components/custom/userbanner/_component.scss)
+- [\_components.scss](https://github.com/Onred/stencil-test/tree/master/assets/scss/components/_components.scss)
+- [\_userbanner.scss](https://github.com/Onred/stencil-test/tree/master/assets/scss/components/custom/userbanner/_userbanner.scss)
+- [en.json](https://github.com/Onred/stencil-test/tree/master/lang/en.json)
 
-console.log(jsContext.myProductName); // Will output: Sample Product
-</script>
-```
-
-You can compose your JSON object across multiple pages to create a different set of client-side data depending on the currently loaded template context.
-
-The stencil theme makes the jsContext available on both the active page scoped and global PageManager objects as `this.context`.
-
-## Polyfilling via Feature Detection
-Cornerstone implements [this strategy](https://philipwalton.com/articles/loading-polyfills-only-when-needed/) for polyfilling.
-
-In `templates/components/common/polyfill-script.html` there is a simple feature detection script which can be extended to detect any recent JS features you intend to use in your theme code.
-
-If any one of the conditions is not met, an additional blocking JS bundle configured in `assets/js/polyfills.js` will be loaded to polyfill modern JS features before the main bundle executes. 
-
-This intentionally prioritizes the experience of the 90%+ of shoppers who are on modern browsers in terms of performance, while maintaining compatibility (at the expense of additional JS download+parse for the polyfills) for users on legacy browsers.
-
-## Static assets
-Some static assets in the Stencil theme are handled with Grunt if required. This
-means you have some dependencies on grunt and npm. To get started:
-
-First make sure you have Grunt installed globally on your machine:
-
-```
-npm install -g grunt-cli
-```
-
-and run:
-
-```
-npm install
-```
-
-Note: package-lock.json file was generated by Node version 18 and npm version 9. The app supports Node 18 as well as multiple versions of npm, but we should always use those versions when updating package-lock.json, unless it is decided to upgrade those, and in this case the readme should be updated as well. If using a different version for node OR npm, please delete the package-lock.json file prior to installing node packages and also prior to pushing to github.
-
-If updating or adding a dependency, please double check that you are working on Node version 9 and npm version 9 and run ```npm update <package_name>```  or ```npm install <package_name>``` (avoid running npm install for updating a package). After updating the package, please make sure that the changes in the package-lock.json reflect only the updated/new package prior to pushing the changes to github.
-
-
-### Icons
-Icons are delivered via a single SVG sprite, which is embedded on the page in
-`templates/layout/base.html`. It is generated via a grunt task `grunt svgstore`.
-
-The task takes individual SVG files for each icon in `assets/icons` and bundles
-them together, to be inlined on the top of the theme, via an ajax call managed
-by svg-injector. Each icon can then be called in a similar way to an inline image via:
-
-```
-<svg><use xlink:href="#icon-svgFileName" /></svg>
-```
-
-The ID of the SVG icon you are calling is based on the filename of the icon you want,
-with `icon-` prepended. e.g. `xlink:href="#icon-facebook"`.
-
-Simply add your new icon SVG file to the icons folder, and run `grunt svgstore`,
-or just `grunt`.
-
-#### License
-
-(The MIT License)
-Copyright (C) 2015-present BigCommerce Inc.
-All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+My previous experience working with the Handlebars helpers made this bonus task relatively quick to complete. I opted for minimal styling and used this as an opportunity to practice importing my own custom CSS. I designed the component in a way that is easily scalable should one want to add additional fields. The component automatically detects if the information exists and if not, it will change its text to say the info is missing.

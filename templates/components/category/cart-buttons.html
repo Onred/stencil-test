@@ -1,0 +1,13 @@
+{{assignVar "num_products_with_no_options" category.total_products}}
+{{#each category.products}}
+    {{#if has_options}}
+        <div style="display: none;">{{decrementVar "num_products_with_no_options"}}</div>
+    {{/if}}
+{{/each}}
+
+{{#gt (getVar "num_products_with_no_options") 0}}
+    <button type="button" data-button-type="add-all-to-cart" data-products-list="{{JSONstringify category.products}}" class="button button--small">{{lang 'category.add_all_to_cart'}}</button>
+{{/gt}}
+<button type="button" data-button-type="remove-all-from-cart" id="remove-all-from-cart-button" {{#eq cart.quantity 0}}style="display: none;"{{/eq}} class="button button--small">{{lang 'category.remove_all_from_cart'}}</button>
+<div class="animated-alertBox hide" id="add-all-to-cart">{{> components/common/alert/alert-success (lang 'category.add_all_cart_announcement' total=(getVar "num_products_with_no_options"))}}</div>
+<div class="animated-alertBox hide" id="remove-all-from-cart">{{> components/common/alert/alert-generic (lang 'category.remove_all_cart_announcement')}}</div>

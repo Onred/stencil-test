@@ -23,3 +23,14 @@
         }
     }
 }
+
+.animated-alertBox {
+    transition: all .15s;
+    max-height: 100px;
+}
+.animated-alertBox.hide {
+    visibility: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: scaleY(0);
+}

@@ -135,7 +135,6 @@ export default class Category extends CatalogPage {
 
     addAllProductsToCart(e) {
         this.hideAlertBanners();
-        
         utils.api.cart.getCart({}, (err, response) => {
             const cart_id = response ? response.id : "";
             const cart_quantity = Number(localStorage.getItem('cart-quantity'));
@@ -152,7 +151,6 @@ export default class Category extends CatalogPage {
             const cart_payload = {
                 "lineItems": line_items
             }
-            console.log(cart_payload)
             const route = "/api/storefront/carts/" + cart_id + "/items";
             return fetch(route, {
                 method: "POST",
@@ -162,8 +160,7 @@ export default class Category extends CatalogPage {
                 },
                 body: JSON.stringify(cart_payload),
             })
-            .then(response => response.json())
-            .then(result => {
+            .then(response => {
                 $('body').trigger('cart-quantity-update', cart_quantity + line_items.length);
                 this.showAlertBanner("add_all");
                 this.showHideRemoveButton("show")
@@ -175,7 +172,6 @@ export default class Category extends CatalogPage {
     removeAllFromCart(e) {
         this.hideAlertBanners();
         utils.api.cart.getCart({}, (err, response) => {
-            console.log(response)
             const cart_id = response.id;
             const cart_quantity = Number(localStorage.getItem('cart-quantity'));
             const route = "/api/storefront/carts/" + cart_id;
@@ -191,7 +187,6 @@ export default class Category extends CatalogPage {
                 if (status_code === 204) {
                     $('body').trigger('cart-quantity-update', 0);
                     this.showAlertBanner("remove_all");
-                    console.log(e)
                     this.showHideRemoveButton("hide")
                 }
             })

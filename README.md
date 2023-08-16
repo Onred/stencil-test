@@ -1,6 +1,9 @@
 # BigCommerce Theme Builder Test
 Jared ONeil
 
+[Link to store](https://github.com/Onred/stencil-test)\
+Preview Code: `nqcrlgdwr9`
+
 This readme describes an overview of my test as well as some of my thoughts.
 
 ### Installation

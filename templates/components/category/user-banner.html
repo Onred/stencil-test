@@ -1,6 +1,8 @@
+{{#if customer}}
 <div class="user-banner-container">
     <div>{{lang 'customer_banner.welcome_back' name=customer.name}}</div>
     <div>{{> components/category/user-banner-detail detail_name='email address' detail_value=customer.email}}</div>
     <div>{{> components/category/user-banner-detail detail_name='phone number' detail_value=customer.phone}}</div>
     <div>{{> components/category/user-banner-detail detail_name='country' detail_value=customer.shipping_address.country}}</div>
 </div>
+{{/if}}
